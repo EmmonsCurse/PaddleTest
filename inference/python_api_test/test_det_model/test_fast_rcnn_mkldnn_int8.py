@@ -24,7 +24,7 @@ def check_model_exist():
     """
     check model exist
     """
-    fast_rcnn_url = "https://paddle-qa.bj.bcebos.com/inference_model_clipped/2.2.2/detection/fast_rcnn.tgz"
+    fast_rcnn_url = "https://paddle-qa.bj.bcebos.com/inference_model_clipped/2.5.1/detection/fast_rcnn.tgz"
     if not os.path.exists("./fast_rcnn/model.pdiparams"):
         wget.download(fast_rcnn_url, out="./")
         tar = tarfile.open("fast_rcnn.tgz")
