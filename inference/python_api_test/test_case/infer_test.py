@@ -744,6 +744,7 @@ class InferenceTest(object):
             {names[i]: max_input_shape[i] for i in range(len(names))},
             {names[i]: opt_input_shape[i] for i in range(len(names))},
         )
+        self.pd_config.enable_new_executor()
 
         predictor = paddle_infer.create_predictor(self.pd_config)
 
