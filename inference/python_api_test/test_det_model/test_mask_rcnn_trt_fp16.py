@@ -25,7 +25,7 @@ def check_model_exist():
     """
     check model exist
     """
-    mask_rcnn_url = "https://paddle-qa.bj.bcebos.com/inference_model_clipped/2.2.2/detection/mask_rcnn.tgz"
+    mask_rcnn_url = "https://paddle-qa.bj.bcebos.com/inference_model_clipped/latest_release/detection/mask_rcnn.tgz"
     if not os.path.exists("./mask_rcnn/model.pdiparams"):
         wget.download(mask_rcnn_url, out="./")
         tar = tarfile.open("mask_rcnn.tgz")
@@ -107,7 +107,7 @@ def test_trt_fp16_more_bz():
             det_top_bbox=True,
             need_sort=True,
             det_top_bbox_threshold=0.85,
-            check_output_list=["save_infer_model/scale_0.tmp_0", "save_infer_model/scale_1.tmp_0"],
+            check_output_list=["save_infer_model/scale_0.tmp_1", "save_infer_model/scale_1.tmp_1"],
         )
 
         del test_suite2  # destroy class to save memory
