@@ -25,7 +25,7 @@ def check_model_exist():
     """
     check model exist
     """
-    ViT_large_patch16_384_url = "https://paddle-qa.bj.bcebos.com/inference_model/latest_release/class/ViT_large_patch16_384.tgz"
+    ViT_large_patch16_384_url = "https://paddle-qa.bj.bcebos.com/inference_model_clipped/latest_release/class/ViT_large_patch16_384.tgz"
     if not os.path.exists("./ViT_large_patch16_384/inference.pdiparams"):
         wget.download(ViT_large_patch16_384_url, out="./")
         tar = tarfile.open("ViT_large_patch16_384.tgz")
