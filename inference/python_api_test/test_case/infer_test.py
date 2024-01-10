@@ -117,7 +117,6 @@ class InferenceTest(object):
             self.pd_config.disable_gpu()
         elif device == "gpu":
             self.pd_config.enable_use_gpu(256, 0)
-        self.pd_config.switch_ir_optim(False)
         self.pd_config.enable_new_executor()
         self.pd_config.enable_memory_optim()
         self.pd_config.collect_shape_range_info(f"{model_path}/shape_range.pbtxt")
@@ -301,7 +300,6 @@ class InferenceTest(object):
         if precision == "int8":
             self.pd_config.enable_mkldnn_int8()
         self.pd_config.set_mkldnn_cache_capacity(mkldnn_cache_capacity)
-        self.pd_config.switch_ir_optim(False)
         self.pd_config.enable_new_executor()
         predictor = paddle_infer.create_predictor(self.pd_config)
 
@@ -404,7 +402,6 @@ class InferenceTest(object):
             None
         """
         self.pd_config.enable_use_gpu(gpu_mem, 0)
-        self.pd_config.switch_ir_optim(False)
         self.pd_config.enable_new_executor()
         predictor = paddle_infer.create_predictor(self.pd_config)
 
@@ -438,7 +435,6 @@ class InferenceTest(object):
             None
         """
         self.pd_config.enable_use_gpu(gpu_mem, 0)
-        self.pd_config.switch_ir_optim(False)
         self.pd_config.enable_new_executor()
         predictor = paddle_infer.create_predictor(self.pd_config)
 
@@ -532,7 +528,6 @@ class InferenceTest(object):
             for ir_pass in delete_pass_list:
                 self.pd_config.delete_pass(ir_pass)
 
-        self.pd_config.switch_ir_optim(False)
         self.pd_config.enable_new_executor()
 
         predictor = paddle_infer.create_predictor(self.pd_config)
@@ -667,7 +662,6 @@ class InferenceTest(object):
         if delete_op_list:
             self.pd_config.exp_disable_tensorrt_ops(delete_op_list)
 
-        self.pd_config.switch_ir_optim(False)
         self.pd_config.enable_new_executor()
         predictor = paddle_infer.create_predictor(self.pd_config)
 
@@ -752,7 +746,6 @@ class InferenceTest(object):
             {names[i]: max_input_shape[i] for i in range(len(names))},
             {names[i]: opt_input_shape[i] for i in range(len(names))},
         )
-        self.pd_config.switch_ir_optim(False)
         self.pd_config.enable_new_executor()
 
         predictor = paddle_infer.create_predictor(self.pd_config)
