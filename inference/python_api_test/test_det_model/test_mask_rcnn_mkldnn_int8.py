@@ -24,7 +24,7 @@ def check_model_exist():
     """
     check model exist
     """
-    mask_rcnn_url = "https://paddle-qa.bj.bcebos.com/inference_model_clipped/2.2.2/detection/mask_rcnn.tgz"
+    mask_rcnn_url = "https://paddle-qa.bj.bcebos.com/inference_model/2.3.2/detection/mask_rcnn.tgz"
     if not os.path.exists("./mask_rcnn/model.pdiparams"):
         wget.download(mask_rcnn_url, out="./")
         tar = tarfile.open("mask_rcnn.tgz")
