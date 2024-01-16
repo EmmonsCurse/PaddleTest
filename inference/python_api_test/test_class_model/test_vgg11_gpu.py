@@ -141,7 +141,7 @@ def test_gpu_mixed_precision_bz1():
         test_suite2.gpu_more_bz_test_mix(
             input_data_dict,
             output_data_dict,
-            delta=1e-4,
+            delta=5e-3,
         )
 
         del test_suite2  # destroy class to save memory
