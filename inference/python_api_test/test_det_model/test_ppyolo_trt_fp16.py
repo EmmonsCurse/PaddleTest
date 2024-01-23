@@ -70,9 +70,9 @@ def test_trt_fp16_more_bz():
             file_path, images_size, center=False, model_type="det"
         )
 
-        img = images_origin_list[1:batch_size + 1]
-        result = npy_list[0: batch_size * 2]
-        data = np.array(images_list[1:batch_size + 1]).astype("float32")
+        img = images_origin_list[1 : batch_size + 1]
+        result = npy_list[0 : batch_size * 2]
+        data = np.array(images_list[1 : batch_size + 1]).astype("float32")
         scale_factor_pool = []
         for batch in range(batch_size):
             scale_factor = (

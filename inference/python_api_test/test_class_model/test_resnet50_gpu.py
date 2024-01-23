@@ -69,7 +69,7 @@ def test_disable_gpu():
 @pytest.mark.win
 @pytest.mark.server
 @pytest.mark.gpu
-def test_gpu_more_bz():
+def test_gpu_more_bz_new_executor():
     """
     compared gpu batch_size=1-2 resnet50 outputs with true val
     """
@@ -100,16 +100,11 @@ def test_gpu_more_bz():
             input_data_dict,
             output_data_dict,
             delta=1e-5,
+            use_new_executor=True,
+            use_pir=True,
         )
 
         del test_suite2  # destroy class to save memory
-
-
-# skip the resnet50 gpu_mixed_precision_case
-if paddle.version.cuda() == "10.2":
-    cuda_skip = pytest.mark.skip(reason="unsupported CUDA version")
-else:
-    cuda_skip = pytest.mark.none
 
 
 @pytest.mark.win
