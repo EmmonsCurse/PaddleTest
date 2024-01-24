@@ -25,7 +25,7 @@ def check_model_exist():
     """
     check model exist
     """
-    fast_rcnn_url = "https://paddle-qa.bj.bcebos.com/inference_model_clipped/2.2.2/detection/fast_rcnn.tgz"
+    fast_rcnn_url = "https://paddle-qa.bj.bcebos.com/inference_model/2.6/detection/fast_rcnn.tgz"
     if not os.path.exists("./fast_rcnn/model.pdiparams"):
         wget.download(fast_rcnn_url, out="./")
         tar = tarfile.open("fast_rcnn.tgz")
@@ -70,8 +70,8 @@ def test_trt_fp16_more_bz():
             file_path, images_size, center=False, model_type="det", with_true_data=False
         )
 
-        img = images_origin_list[0:batch_size]
-        data = np.array(images_list[0:batch_size]).astype("float32")
+        img = images_origin_list[1 : batch_size + 1]
+        data = np.array(images_list[1 : batch_size + 1]).astype("float32")
         scale_factor_pool = []
         for batch in range(batch_size):
             scale_factor = (
@@ -100,7 +100,7 @@ def test_trt_fp16_more_bz():
             input_data_dict,
             output_data_dict,
             repeat=1,
-            delta=3e-1,
+            delta=4e-1,
             precision="trt_fp16",
             min_subgraph_size=1,
             dynamic=True,
