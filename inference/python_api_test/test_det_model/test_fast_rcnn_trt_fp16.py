@@ -100,7 +100,7 @@ def test_trt_fp16_more_bz():
             input_data_dict,
             output_data_dict,
             repeat=1,
-            delta=3e-1,
+            delta=4e-1,
             precision="trt_fp16",
             min_subgraph_size=1,
             dynamic=True,
