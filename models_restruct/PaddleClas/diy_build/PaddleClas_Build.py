@@ -119,16 +119,16 @@ class PaddleClas_Build(Model_Build):
             logger.info("#### {} can not open yaml".format(value))
         return image_name
 
-    def change_yaml_batch_size(self, data_json):
+    def change_yaml_batch_size(self, data_json, scale):
         """
         递归使所有batch_size,默认除以3
         """
         if isinstance(data_json, dict):
             for key, val in data_json.items():
                 if (key == "batch_size" and "@" not in str(val)) or (key == "first_bs" and "@" not in str(val)):
-                    data_json[key] = str(int(np.ceil(float(val) / 3))) + "  #@"
+                    data_json[key] = str(int(np.ceil(float(val) / scale))) + "  #@"
                 if isinstance(data_json[key], dict):
-                    self.change_yaml_batch_size(data_json[key])
+                    self.change_yaml_batch_size(data_json[key], scale)
         return data_json
 
     def build_yaml(self):
@@ -143,9 +143,12 @@ class PaddleClas_Build(Model_Build):
 
                 # 改变 batch_size
                 if "PKSampler" in str(content) or "DistributedRandomIdentitySampler" in str(content):
-                    logger.info("#### do not change batch_size in {}".format(line))
+                    # logger.info("#### do not change batch_size in {}".format(line))
+                    content_new = self.change_yaml_batch_size(content, 4)  # 写在with里面不能够全部生效
+                    with open(os.path.join(self.REPO_PATH, line), "w") as f:
+                        yaml.dump(content_new, f, sort_keys=False)
                 else:
-                    content_new = self.change_yaml_batch_size(content)  # 写在with里面不能够全部生效
+                    content_new = self.change_yaml_batch_size(content, 3)  # 写在with里面不能够全部生效
                     with open(os.path.join(self.REPO_PATH, line), "w") as f:
                         yaml.dump(content_new, f, sort_keys=False)
 
@@ -294,8 +297,14 @@ class PaddleClas_Build(Model_Build):
         安装依赖包
         """
         # 固定随机量需要，默认打开
+        logger.info("#### or AGILE_PIPELINE_NAME is {}".format(os.getenv("AGILE_PIPELINE_NAME")))
+        # 230505 for wanghuan
+        if str(os.getenv("AGILE_PIPELINE_NAME")) == "PaddleClas-Linux-Cuda102-Python37-ALL-Release-test3":
+            os.environ["FLAGS_use_stride_kernel"] = "1"
+        logger.info("#### set FLAGS_use_stride_kernel as {}".format(os.getenv("FLAGS_use_stride_kernel")))
+
         os.environ["FLAGS_cudnn_deterministic"] = "True"
-        logger.info("#### set FLAGS_cudnn_deterministic as {}".format(os.environ["FLAGS_cudnn_deterministic"]))
+        logger.info("#### set FLAGS_cudnn_deterministic as {}".format(os.getenv("FLAGS_cudnn_deterministic")))
 
         path_now = os.getcwd()
         os.chdir(self.reponame)  # 执行setup要先切到路径下面
@@ -309,48 +318,63 @@ class PaddleClas_Build(Model_Build):
 
         if self.value_in_modellist(value="slim"):
             logger.info("#### slim install")
-            if os.path.exists("PaddleSlim") is False:
-                try:
-                    wget.download("https://xly-devops.bj.bcebos.com/PaddleTest/PaddleSlim/PaddleSlim-develop.tar.gz")
-                    tf = tarfile.open("PaddleSlim-develop.tar.gz")
-                    tf.extractall(os.getcwd())
-                    if os.path.exists("PaddleSlim-develop"):
-                        os.rename("PaddleSlim-develop", "PaddleSlim")
-                except:
-                    logger.info("#### prepare download failed {} failed".format("PaddleSlim.tar.gz"))
-            if os.path.exists("PaddleSlim") and (
-                "develop" in str(self.paddle_whl) or "Develop" in str(self.paddle_whl) or "None" in str(self.paddle_whl)
-            ):
-                logger.info("#### install devlop paddleslim")
-                path_now = os.getcwd()
-                os.chdir("PaddleSlim")
-                os.system("git checkout develop")
-                os.system("git pull")
-                exit_code_paddleslim = os.system(
-                    "python -m pip install -r requirements.txt \
-                    -i https://mirror.baidu.com/pypi/simple"
+            # 安装paddleslim
+            exit_code_slim = os.system(
+                "python -m  pip install \
+            https://paddle-qa.bj.bcebos.com/PaddleSlim/paddleslim-0.0.0.dev0-py3-none-any.whl \
+                -i https://mirror.baidu.com/pypi/simple"
+            )
+            if exit_code_slim and ("Windows" not in platform.system() and "Darwin" not in platform.system()):
+                exit_code_slim = os.system(
+                    "python -m  pip install --user\
+            https://paddle-qa.bj.bcebos.com/PaddleSlim/paddleslim-0.0.0.dev0-py3-none-any.whl \
+                -i https://mirror.baidu.com/pypi/simple"
                 )
-                if exit_code_paddleslim and ("Windows" not in platform.system() and "Darwin" not in platform.system()):
-                    exit_code_paddleslim = os.system(
-                        "python -m pip install --user -r requirements.txt \
-                    -i https://mirror.baidu.com/pypi/simple"
-                    )
-                os.system("python -m pip uninstall paddleslim -y")
-                cmd_return = os.system("python setup.py install > paddleslim_install.log 2>&1 ")
-                os.chdir(path_now)
-            else:
-                logger.info("#### install release paddleslim")
-                exit_code_paddleslim = os.system(
-                    "python -m pip install -U paddleslim \
-                    -i https://mirror.baidu.com/pypi/simple"
-                )
-            if exit_code_paddleslim and ("Windows" not in platform.system() and "Darwin" not in platform.system()):
-                exit_code_paddleslim = os.system(
-                    "python -m pip install --user -U paddleslim \
-                    -i https://mirror.baidu.com/pypi/simple"
-                )
-                logger.info("repo {} python -m pip install paddleslim failed".format(self.reponame))
-                # return 1
+            if exit_code_slim:
+                logger.info("repo {} python -m pip install nvidia_dali_cuda110 failed".format(self.reponame))
+
+        # if os.path.exists("PaddleSlim") is False:
+        #     try:
+        #         wget.download("https://xly-devops.bj.bcebos.com/PaddleTest/PaddleSlim/PaddleSlim-develop.tar.gz")
+        #         tf = tarfile.open("PaddleSlim-develop.tar.gz")
+        #         tf.extractall(os.getcwd())
+        #         if os.path.exists("PaddleSlim-develop"):
+        #             os.rename("PaddleSlim-develop", "PaddleSlim")
+        #     except:
+        #         logger.info("#### prepare download failed {} failed".format("PaddleSlim.tar.gz"))
+        # if os.path.exists("PaddleSlim") and (
+        #     "develop" in str(self.paddle_whl) or "Develop" in str(self.paddle_whl) or "None" in str(self.paddle_whl)
+        # ):
+        #     logger.info("#### install devlop paddleslim")
+        #     path_now = os.getcwd()
+        #     os.chdir("PaddleSlim")
+        #     os.system("git checkout develop")
+        #     os.system("git pull")
+        #     exit_code_paddleslim = os.system(
+        #         "python -m pip install -r requirements.txt \
+        #         -i https://mirror.baidu.com/pypi/simple"
+        #     )
+        #     if exit_code_paddleslim and ("Windows" not in platform.system() and "Darwin" not in platform.system()):
+        #         exit_code_paddleslim = os.system(
+        #             "python -m pip install --user -r requirements.txt \
+        #         -i https://mirror.baidu.com/pypi/simple"
+        #         )
+        #     os.system("python -m pip uninstall paddleslim -y")
+        #     cmd_return = os.system("python setup.py install > paddleslim_install.log 2>&1 ")
+        #     os.chdir(path_now)
+        # else:
+        #     logger.info("#### install release paddleslim")
+        #     exit_code_paddleslim = os.system(
+        #         "python -m pip install -U paddleslim \
+        #         -i https://mirror.baidu.com/pypi/simple"
+        #     )
+        # if exit_code_paddleslim and ("Windows" not in platform.system() and "Darwin" not in platform.system()):
+        #     exit_code_paddleslim = os.system(
+        #         "python -m pip install --user -U paddleslim \
+        #         -i https://mirror.baidu.com/pypi/simple"
+        #     )
+        #     logger.info("repo {} python -m pip install paddleslim failed".format(self.reponame))
+        #     # return 1
 
         if self.value_in_modellist(value="face") and self.value_in_modellist(value="metric_learning"):
             logger.info("#### face and metric_learning install")
@@ -379,12 +403,25 @@ class PaddleClas_Build(Model_Build):
                 logger.info("repo {} python -m pip install bcolz failed".format(self.reponame))
                 # return 1
 
+            exit_code_Pillow = os.system(
+                "python -m  pip install Pillow==9.5.0 \
+                -i https://mirror.baidu.com/pypi/simple"
+            )
+            if exit_code_Pillow and ("Windows" not in platform.system() and "Darwin" not in platform.system()):
+                exit_code_Pillow = os.system(
+                    "python -m  pip install Pillow==9.5.0 --user \
+                -i https://mirror.baidu.com/pypi/simple"
+                )
+            if exit_code_Pillow:
+                logger.info("repo {} python -m pip install Pillow failed".format(self.reponame))
+                # return 1
+
         if (self.value_in_modellist(value="amp") or self.value_in_modellist(value="dy2st_convergence")) and (
             "Windows" not in platform.system() and "Darwin" not in platform.system()
         ):
             logger.info("#### fp16 or amp install")
             if os.path.exists("nvidia_dali_cuda102-1.8.0-3362432-py3-none-manylinux2014_x86_64.whl") and os.path.exists(
-                "nvidia_dali_cuda110-1.23.0-7355173-py3-none-manylinux2014_x86_64.whl"
+                "nvidia_dali_nightly_cuda110-1.30.0.dev20230904-9637328-py3-none-manylinux2014_x86_64.whl"
             ):
                 logger.info("#### already download nvidia_dali_cuda102 nvidia_dali_cuda110")
             else:
@@ -396,7 +433,7 @@ class PaddleClas_Build(Model_Build):
                     )
                     wget.download(
                         "https://paddle-qa.bj.bcebos.com/PaddleClas/{}".format(
-                            "nvidia_dali_cuda110-1.23.0-7355173-py3-none-manylinux2014_x86_64.whl"
+                            "nvidia_dali_nightly_cuda110-1.30.0.dev20230904-9637328-py3-none-manylinux2014_x86_64.whl"
                         )
                     )
                 except:
@@ -429,27 +466,27 @@ class PaddleClas_Build(Model_Build):
             #     logger.info("repo {} python -m pip install nvidia_dali_cuda102 failed".format(self.reponame))
             #     # return 1
 
-            # cuda11  最新numpy有BUG
-            logger.info("because of dali have np.int, so change numpy version")
-            exit_code_numpy = os.system(
-                "python -m  pip install numpy==1.21.2 \
-                -i https://mirror.baidu.com/pypi/simple"
-            )
-            if exit_code_numpy and ("Windows" not in platform.system() and "Darwin" not in platform.system()):
-                exit_code_numpy = os.system(
-                    "python -m  pip install --user numpy==1.21.2 \
-                    -i https://mirror.baidu.com/pypi/simple"
-                )
+            # cuda11  最新numpy有BUG #230712 已修复
+            # logger.info("because of dali have np.int, so change numpy version")
+            # exit_code_numpy = os.system(
+            #     "python -m  pip install numpy==1.21.2 \
+            #     -i https://mirror.baidu.com/pypi/simple"
+            # )
+            # if exit_code_numpy and ("Windows" not in platform.system() and "Darwin" not in platform.system()):
+            #     exit_code_numpy = os.system(
+            #         "python -m  pip install --user numpy==1.21.2 \
+            #         -i https://mirror.baidu.com/pypi/simple"
+            #     )
             # 安装nvidia
             exit_code_nvidia = os.system(
                 "python -m  pip install \
-            nvidia_dali_cuda110-1.23.0-7355173-py3-none-manylinux2014_x86_64.whl \
+            nvidia_dali_nightly_cuda110-1.30.0.dev20230904-9637328-py3-none-manylinux2014_x86_64.whl \
                 -i https://mirror.baidu.com/pypi/simple"
             )
             if exit_code_nvidia and ("Windows" not in platform.system() and "Darwin" not in platform.system()):
                 exit_code_nvidia = os.system(
                     "python -m  pip install --user\
-            nvidia_dali_cuda110-1.23.0-7355173-py3-none-manylinux2014_x86_64.whl \
+            nvidia_dali_nightly_cuda110-1.30.0.dev20230904-9637328-py3-none-manylinux2014_x86_64.whl \
                 -i https://mirror.baidu.com/pypi/simple"
                 )
             if exit_code_nvidia:

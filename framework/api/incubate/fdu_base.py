@@ -15,17 +15,14 @@ def _product(t):
     """
     product
     """
-    if isinstance(t, int):
-        return t
-    else:
-        return np.product(t)
+    return int(np.product(t))
 
 
 def _get_item(t, idx):
     """
     get_item
     """
-    assert isinstance(t, paddle.fluid.framework.Variable), "The first argument t must be Tensor."
+    assert isinstance(t, paddle.static.Variable), "The first argument t must be Tensor."
     assert isinstance(idx, int), "The second argument idx must be an int number."
     flat_t = paddle.reshape(t, [-1])
     return flat_t.__getitem__(idx)
@@ -35,7 +32,7 @@ def _set_item(t, idx, value):
     """
     set_item
     """
-    assert isinstance(t, paddle.fluid.framework.Variable), "The first argument t must be Tensor."
+    assert isinstance(t, paddle.static.Variable), "The first argument t must be Tensor."
     assert isinstance(idx, int), "The second argument idx must be an int number."
     flat_t = paddle.reshape(t, [-1])
     flat_t.__setitem__(idx, value)
@@ -46,7 +43,7 @@ def _as_tensors(xs):
     """
     as_tensors
     """
-    return (xs,) if isinstance(xs, paddle.fluid.framework.Variable) else xs
+    return (xs,) if isinstance(xs, paddle.static.Variable) else xs
 
 
 def _compute_numerical_jacobian(func, xs, delta, np_dtype):
@@ -67,6 +64,7 @@ def _compute_numerical_jacobian(func, xs, delta, np_dtype):
     for j in range(fin_size):
         for q in range(_product(xs[j].shape)):
             orig = _get_item(xs[j], q)
+            orig = paddle.assign(orig)
             x_pos = orig + delta
             xs[j] = _set_item(xs[j], q, x_pos)
             ys_pos = _as_tensors(func(*xs))
@@ -144,6 +142,7 @@ def _compute_numerical_hessian(func, xs, delta, np_dtype):
             for j in range(fin_size):
                 for q in range(_product(xs[j].shape)):
                     orig = _get_item(xs[j], q)
+                    orig = paddle.assign(orig)
                     x_pos = orig + delta
                     xs[j] = _set_item(xs[j], q, x_pos)
                     jacobian_pos = _compute_numerical_jacobian(func, xs, delta, np_dtype)

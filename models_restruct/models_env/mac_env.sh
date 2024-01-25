@@ -65,7 +65,7 @@ if [[ ${AGILE_PIPELINE_NAME} =~ "-Intel-" ]] && [[ ${AGILE_PIPELINE_NAME} =~ "Py
     if [[ ${AGILE_PIPELINE_NAME} =~ "Develop" ]];then
         export paddle_whl=${paddle_whl:-"https://paddle-qa.bj.bcebos.com/paddle-pipeline/Develop-Build-Mac/latest/paddlepaddle-0.0.0-cp310-cp310-macosx_10_9_x86_64.whl"}
     else
-        export paddle_whl=${paddle_whl:-"https://paddle-qa.bj.bcebos.com/paddle-pipeline/Release-Build-Mac/latest/paddlepaddle-0.0.0-cp310-cp310-macosx_10_14_universal2.whl"}
+        export paddle_whl=${paddle_whl:-"https://paddle-qa.bj.bcebos.com/paddle-pipeline/Release-Build-Mac/latest/paddlepaddle-0.0.0-cp310-cp310-macosx_10_9_x86_64.whl"}
     fi
 elif [[ ${AGILE_PIPELINE_NAME} =~ "-M1-" ]] && [[ ${AGILE_PIPELINE_NAME} =~ "Python310" ]];then
     if [[ ${AGILE_PIPELINE_NAME} =~ "Develop" ]];then
@@ -106,7 +106,7 @@ export CE_version_name=${CE_version_name:-TestFrameWork}
 export models_name=${models_name:-models_restruct}
 
 ####测试框架下载
-wget -q ${CE_Link} #需要全局定义
+wget -q ${CE_Link} --no-proxy #需要全局定义
 unzip -P ${CE_pass} ${CE_version_name}.zip
 
 ####设置代理  proxy不单独配置 表示默认有全部配置，不用export

@@ -293,8 +293,14 @@ class PaddleGAN_Build(Model_Build):
         安装依赖包
         """
         # 固定随机量需要，默认打开
+        logger.info("#### or AGILE_PIPELINE_NAME is {}".format(os.getenv("AGILE_PIPELINE_NAME")))
+        # 230505 for wanghuan
+        if str(os.getenv("AGILE_PIPELINE_NAME")) == "PaddleGAN-Linux-Cuda102-Python37-ALL-Release-test3":
+            os.environ["FLAGS_use_stride_kernel"] = "1"
+        logger.info("#### set FLAGS_use_stride_kernel as {}".format(os.getenv("FLAGS_use_stride_kernel")))
+
         os.environ["FLAGS_cudnn_deterministic"] = "True"
-        logger.info("#### set FLAGS_cudnn_deterministic as {}".format(os.environ["FLAGS_cudnn_deterministic"]))
+        logger.info("#### set FLAGS_cudnn_deterministic as {}".format(os.getenv("FLAGS_cudnn_deterministic")))
 
         path_now = os.getcwd()
         os.chdir(self.reponame)  # 执行setup要先切到路径下面
@@ -319,10 +325,13 @@ class PaddleGAN_Build(Model_Build):
         if ret:
             logger.info("build env whl failed")
             return ret
-        ret = self.build_yaml()
-        if ret:
-            logger.info("build env yaml failed")
-            return ret
+
+        logger.info("self.system  is {}".format(self.system))
+        if "convergence" not in self.system:
+            ret = self.build_yaml()
+            if ret:
+                logger.info("build env yaml failed")
+                return ret
 
         ret = self.build_infer_dataset()
         if ret:

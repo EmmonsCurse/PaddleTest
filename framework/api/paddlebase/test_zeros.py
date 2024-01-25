@@ -9,7 +9,7 @@ import paddle
 import pytest
 import numpy as np
 
-is_in_eager = paddle.fluid.framework._in_eager_without_dygraph_check()
+is_in_eager = True
 
 
 class TestZeros(APIBase):
@@ -357,7 +357,7 @@ def test_zeros29():
     shape_type=list,shape_value=[2, [3]],static TypeError
     """
     shape = [2, [3]]
-    obj.exception(mode="c", etype="InvalidArgument", shape=shape)
+    obj.exception(mode="c", etype="InvalidType", shape=shape)
 
 
 # @pytest.mark.api_base_zeros_exception
@@ -376,7 +376,7 @@ def test_zeros31():
     shape_type=tuple,shape=(1.1),AttributeError
     """
     shape = 1.1
-    etype = ValueError if is_in_eager else AttributeError
+    etype = TypeError if is_in_eager else AttributeError
     obj.exception(mode="python", etype=etype, shape=shape)
 
 

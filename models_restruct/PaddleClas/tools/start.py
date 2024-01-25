@@ -202,12 +202,11 @@ class PaddleClas_Start(object):
         # windows mac 使用function得到的结果
         if "Windows" in platform.system() or "Darwin" in platform.system():
             self.env_dict["eval_trained_model"] = os.path.join(
-                "output", self.qa_yaml_name + "_train_function", self.eval_trained_params, "latest"
+                "output", self.qa_yaml_name + "_train_function", "latest"
             )
         else:
-            self.env_dict["eval_trained_model"] = os.path.join(
-                "output", self.qa_yaml_name + "_train_multi", self.eval_trained_params, "latest"
-            )
+            self.env_dict["eval_trained_model"] = os.path.join("output", self.qa_yaml_name + "_train_multi", "latest")
+            # "output", self.qa_yaml_name + "_train_multi", self.eval_trained_params, "latest"
 
         # 准备导出模型
         self.env_dict["export_trained_model"] = os.path.join("inference", self.qa_yaml_name)
@@ -456,7 +455,7 @@ class PaddleClas_Start(object):
                                                     data_json[key][i]["result"] = name_["result"]
                                                 except:
                                                     pass
-                                                #     print("###key {} val1 {} do not have result".format(key, val1))
+                                                    # print("###key {} val1 {} do not have result".format(key, val1))
                                                 # print('###data_json[key]', data_json[key])
                                                 # input()
                         # print('###name11111', name)
@@ -487,7 +486,10 @@ class PaddleClas_Start(object):
                             ):
                                 # 结果和阶段同时满足 否则就有可能把不执行的阶段的result替换到执行的顺序混乱
                                 try:  # 不一定成功，如果不成功输出出来看看
-                                    content[key][i][key1] = content_result[key][i][key1]
+                                    for j, content_result_value in enumerate(content_result[key]):
+                                        if case_value["name"] == content_result_value["name"]:
+                                            content[key][i][key1] = content_result_value[key1]
+                                            continue
                                 except:
                                     logger.info("#### can not update value")
                                     logger.info("#### self.step: {}".format(self.step))

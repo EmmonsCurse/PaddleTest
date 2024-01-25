@@ -501,7 +501,7 @@ class APIBase(object):
                     shape = v.numpy().shape
                     for i in range(len(v.numpy().flatten())):
                         g = self._get_sigle_grad(v, i, k)
-                        grad.append(g[0])
+                        grad.append(g.item())
                         self.kwargs[k] = v
                     numeric_grad[k] = np.array(grad).reshape(shape)
                 elif isinstance(v, (list, tuple)) and isinstance(v[0], paddle.Tensor):
@@ -512,7 +512,7 @@ class APIBase(object):
                         shape = v[n].shape
                         for i in range(len(v[n].flatten())):
                             g = self._get_sigle_grad(v[n], i, k, n)
-                            grad.append(g[0])
+                            grad.append(g.item())
                             self.kwargs[k][n] = v[n]
                         tmp.append(np.array(grad).reshape(shape))
                     numeric_grad[k] = tmp
@@ -532,7 +532,7 @@ class APIBase(object):
                     self.data.stop_gradient = False
                 loss_delta = self._numeric_grad()
                 g = (loss_delta - loss) / self.gap
-                grad.append(g[0])
+                grad.append(g.item())
                 # recover v to self.kwargs
                 self.data = data
             numeric_grad["data"] = np.array(grad).reshape(shape)
@@ -540,12 +540,13 @@ class APIBase(object):
         return numeric_grad
 
     def _get_sigle_grad(self, t, idx, k, n=None):
-        assert isinstance(t, paddle.fluid.framework.Variable), "The first argument t must be Tensor."
+        assert isinstance(t, paddle.static.Variable), "The first argument t must be Tensor."
         assert isinstance(idx, int), "The second argument idx must be an int number."
 
         dtype = t.dtype
         flat_t = paddle.reshape(t, [-1])
         orig = flat_t.__getitem__(idx)
+        orig = paddle.assign(orig)
         flat_t.__setitem__(idx, orig + self.gap)
         x_pos = flat_t.reshape(t.shape).astype(dtype)
         if isinstance(n, int):
@@ -688,7 +689,7 @@ class APIBase(object):
                         logging.info(xyz)
                         for k in xyz:
                             if isinstance(params[k], (list, tuple)) and isinstance(
-                                params[k][0], paddle.fluid.framework.Variable
+                                params[k][0], paddle.static.Variable
                             ):
                                 grad_tmp = []
                                 for i in range(len(params[k])):

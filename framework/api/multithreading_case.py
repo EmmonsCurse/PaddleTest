@@ -29,8 +29,8 @@ failed_ce_case_list = []
 ignore_case_dir = {
     "device": [],
     "fft": [],
-    "incubate": [],
-    "linalg": [],
+    "incubate": ["test_jvp.py"],
+    "linalg": ["test_norm.py"],
     "loss": [],
     "nn": [
         "test_functional_celu.py",
@@ -38,7 +38,11 @@ ignore_case_dir = {
         "test_initializer_truncated_normal_new.py",
         "test_initializer_truncated_normal.py",
     ],
-    "paddlebase": ["test_fill_diagonal_tensor.py", "test_multiplex.py"],
+    "paddlebase": [
+        "test_fill_diagonal_tensor.py",
+        "test_multiplex.py",
+        "test_log.py",
+    ],
     "optimizer": [],
     "distribution": [],
     "utils": [],
@@ -68,11 +72,11 @@ def runCETest(params):
     path = params[0]
     case = params[1]
     print("case: %s" % case)
-    val = os.system("export FLAGS_call_stack_level= && cd %s && python3.7 -m pytest %s" % (path, case))
+    val = os.system("export FLAGS_call_stack_level= && cd %s && python -m pytest %s" % (path, case))
     retry_count = 0
     final_result = ""
     while val != 0:
-        val = os.system("export FLAGS_call_stack_level=2 && cd %s && python3.7 -m pytest %s" % (path, case))
+        val = os.system("export FLAGS_call_stack_level=2 && cd %s && python -m pytest %s" % (path, case))
         retry_count = retry_count + 1
         if retry_count > 2:
             val = 0

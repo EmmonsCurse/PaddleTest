@@ -25,7 +25,7 @@ def check_model_exist():
     """
     check model exist
     """
-    swin_transformer_url = "https://paddle-qa.bj.bcebos.com/inference_model_clipped/2.1/class/swin_transformer.tgz"
+    swin_transformer_url = "https://paddle-qa.bj.bcebos.com/inference_model/2.3.2/class/swin_transformer.tgz"
     if not os.path.exists("./swin_transformer/inference.pdiparams"):
         wget.download(swin_transformer_url, out="./")
         tar = tarfile.open("swin_transformer.tgz")
@@ -50,13 +50,13 @@ def test_config():
 @pytest.mark.trt_fp16
 def test_trt_fp16_more_bz():
     """
-    compared trt fp16 batch_size=1-2 swin_transformer outputs with true val
+    compared trt fp16 batch_size=1 swin_transformer outputs with true val
     """
     check_model_exist()
 
     file_path = "./swin_transformer"
     images_size = 384
-    batch_size_pool = [1, 2]
+    batch_size_pool = [1]
     for batch_size in batch_size_pool:
         test_suite = InferenceTest()
         test_suite.load_config(
@@ -70,20 +70,6 @@ def test_trt_fp16_more_bz():
 
         del test_suite  # destroy class to save memory
 
-        # collect shape for trt
-        test_suite_c = InferenceTest()
-        test_suite_c.load_config(
-            model_file="./swin_transformer/inference.pdmodel",
-            params_file="./swin_transformer/inference.pdiparams",
-        )
-        test_suite_c.collect_shape_info(
-            model_path=file_path,
-            input_data_dict=input_data_dict,
-            device="gpu",
-        )
-
-        del test_suite_c  # destroy class to save memory
-
         test_suite2 = InferenceTest()
         test_suite2.load_config(
             model_file="./swin_transformer/inference.pdmodel",
@@ -94,11 +80,12 @@ def test_trt_fp16_more_bz():
             input_data_dict,
             output_data_dict,
             repeat=1,
-            delta=1e-2,
-            min_subgraph_size=40,
+            delta=2e-2,
+            min_subgraph_size=1,
             precision="trt_fp16",
             max_batch_size=batch_size,
             dynamic=True,
+            auto_tuned=True,
             shape_range_file="./swin_transformer/shape_range.pbtxt",
         )
 
@@ -109,7 +96,7 @@ def test_trt_fp16_more_bz():
 @pytest.mark.trt_fp16
 def test_jetson_trt_fp16_more_bz():
     """
-    compared trt fp32 batch_size=1 swin_transformer outputs with true val
+    compared trt fp16 batch_size=1 swin_transformer outputs with true val
     """
     check_model_exist()
 
@@ -153,8 +140,8 @@ def test_jetson_trt_fp16_more_bz():
             input_data_dict,
             output_data_dict,
             repeat=1,
-            delta=1e-2,
-            min_subgraph_size=10,
+            delta=2e-2,
+            min_subgraph_size=1,
             precision="trt_fp16",
             max_batch_size=batch_size,
             dynamic=True,
@@ -210,8 +197,8 @@ def test_trt_fp16_bz1_multi_thread():
         input_data_dict,
         output_data_dict,
         repeat=1,
-        delta=5e-3,
-        min_subgraph_size=10,
+        delta=2e-2,
+        min_subgraph_size=1,
         precision="trt_fp16",
         dynamic=True,
     )

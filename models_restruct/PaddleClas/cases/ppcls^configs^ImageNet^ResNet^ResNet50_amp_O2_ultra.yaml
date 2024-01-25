@@ -10,19 +10,15 @@ case:
         params:
           - -o DataLoader.Train.loader.num_workers=1
       -
+        name: single_dy2st
+        params:
+          - -o DataLoader.Train.loader.num_workers=1
+      -
         name: multi
         params:
           - -o DataLoader.Train.loader.num_workers=1
       -
-        name: multi_amp
-        params:
-          - -o DataLoader.Train.loader.num_workers=1
-      -
         name: multi_dy2st
-        params:
-          - -o DataLoader.Train.loader.num_workers=1
-      -
-        name: multi_amp_dy2st
         params:
           - -o DataLoader.Train.loader.num_workers=1
     eval:

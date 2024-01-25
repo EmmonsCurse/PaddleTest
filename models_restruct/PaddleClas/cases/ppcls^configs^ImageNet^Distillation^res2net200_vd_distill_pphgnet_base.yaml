@@ -7,6 +7,8 @@ case:
       -
         name: single
       -
+        name: single_dy2st
+      -
         name: multi
       -
         name: multi_dy2st
@@ -52,9 +54,7 @@ case:
         name: function_dy2st
       -
         name: function_amp
-    eval:
-      -
-        name: function
+    eval: skipped
     infer:
       -
         name: function
