@@ -23,6 +23,8 @@ import argparse
 import pkg_resources as pkg
 import paddle
 
+paddle.enable_static()
+
 _logger = logging.getLogger(__name__)
 
 __all__ = ["load_inference_model", "get_model_dir", "load_onnx_model"]
