@@ -14,7 +14,7 @@ fi
 
 wget_ILSVRC2012_mini(){
 echo ---infer ILSVRC2012_mini downloading-----
-wget -q https://paddle-qa.bj.bcebos.com/PaddleSlim_datasets/ILSVRC2012.tar
+wget -q --no-proxy --no-check-certificate https://paddle-qa.bj.bcebos.com/PaddleSlim_datasets/ILSVRC2012.tar
 tar xf ILSVRC2012.tar
 echo ---infer ILSVRC2012_mini downloaded-----
 }
@@ -39,7 +39,7 @@ for model in ${pre_models}
 do
     if [ ! -f ${model} ]; then
         echo ---infer ${model} downloading-----
-        wget -q ${root_url}/${model}_infer.tar
+        wget -q --no-proxy --no-check-certificate ${root_url}/${model}_infer.tar
         tar xf ${model}_infer.tar
     fi
 done
