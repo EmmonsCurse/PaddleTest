@@ -23,6 +23,7 @@ import argparse
 import pkg_resources as pkg
 import paddle
 
+paddle.enable_static()
 
 _logger = logging.getLogger(__name__)
 

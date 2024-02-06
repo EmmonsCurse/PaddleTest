@@ -33,7 +33,7 @@ root_url="https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/inference"
 pre_models="ShuffleNetV2_x1_0 \
     SqueezeNet1_0 PPLCNetV2_base PPLCNet_x1_0 \
     PPHGNet_tiny InceptionV3 EfficientNetB0 GhostNet_x1_0 \
-    MobileNetV3_large_x1_0 MobileNetV3_large_x1_0_ssld "
+    MobileNetV3_large_x1_0 MobileNetV3_large_x1_0_ssld MobileNetV1 ResNet50_vd"
 
 for model in ${pre_models}
 do
@@ -66,10 +66,11 @@ declare -A dic
 #     [MobileNetV1]=0.706 [MobileNetV3_large_x1_0]=0.741 [PPHGNet_tiny]=0.792 \
 #     [PPLCNetV2_base]=0.763 [PPLCNet_x1_0]=0.8 [ResNet50_vd]=0.787 \
 #     [ShuffleNetV2_x1_0]=0.683 [SqueezeNet1_0]=0.594 [MobileNetV3_large_x1_0_ssld]=0.771)
-dic=([EfficientNetB0]=0.7246 [GhostNet_x1_0]=0.726 [InceptionV3]=0.7607 \
-    [MobileNetV3_large_x1_0]=0.7023 [PPHGNet_tiny]=0.7041 \
-    [PPLCNetV2_base]=0.763 [PPLCNet_x1_0]=0.1934 \
-    [ShuffleNetV2_x1_0]=0.683 [SqueezeNet1_0]=0.594 [MobileNetV3_large_x1_0_ssld]=0.6753)
+dic=([EfficientNetB0]=0.7246 [GhostNet_x1_0]=0.726 [InceptionV3]=0.7607 [MobileNetV3_large_x1_0]=0.7023 \
+     [PPHGNet_tiny]=0.7041 [PPLCNetV2_base]=0.763 [PPLCNet_x1_0]=0.1934 [MobileNetV1]=0.706 \
+     [ResNet50_vd]=0.7939 [ShuffleNetV2_x1_0]=0.683 [SqueezeNet1_0]=0.594 \
+     [MobileNetV3_large_x1_0_ssld]=0.6753)
+     
 echo "---models and values---"
 echo ${!dic[*]}   # 输出所有的key
 echo ${dic[*]}    # 输出所有的value
