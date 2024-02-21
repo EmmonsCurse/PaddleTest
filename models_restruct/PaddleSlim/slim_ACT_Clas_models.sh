@@ -29,7 +29,8 @@ root_url="https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/inference"
 #     PPHGNet_tiny InceptionV3 EfficientNetB0 GhostNet_x1_0 \
 #     MobileNetV3_large_x1_0 MobileNetV3_large_x1_0_ssld "
     # 因ViT_base_patch16_224、PPLCNet_x1_0 压缩前后精度不能对齐，暂时去掉；
-pre_models="MobileNetV1 ResNet50_vd"
+# pre_models="MobileNetV1 ResNet50_vd"
+pre_models="PPHGNet_tiny PPLCNet_x1_0"
 # 其他的模型在小数据集下压缩、训练
 
 for model in ${pre_models}
@@ -63,7 +64,7 @@ declare -A dic
 #     [MobileNetV1]=0.706 [MobileNetV3_large_x1_0]=0.741 [PPHGNet_tiny]=0.792 \
 #     [PPLCNetV2_base]=0.763 [PPLCNet_x1_0]=0.8 [ResNet50_vd]=0.787 \
 #     [ShuffleNetV2_x1_0]=0.683 [SqueezeNet1_0]=0.594 [MobileNetV3_large_x1_0_ssld]=0.771)
-dic=([MobileNetV1]=0.706 [ResNet50_vd]=0.787)
+dic=([PPHGNet_tiny]=0.792 [PPLCNet_x1_0]=0.8)
 echo "---models and values---"
 echo ${!dic[*]}   # 输出所有的key
 echo ${dic[*]}    # 输出所有的value
@@ -74,7 +75,7 @@ for model in $(echo ${!dic[*]});do
     base_value=${dic[$model]}
     echo "${model} base value:${base_value}"
     echo "--${model} runned time:"
-    time ( python -m paddle.distributed.launch run.py \
+    time ( python run.py \
         --save_dir=./${model}_act_qat/ \
         --config_path=./configs/${model}/qat_dis.yaml > ${log_path}/${model}_act_qat 2>&1 )
     print_info $? ${model}_act_qat
