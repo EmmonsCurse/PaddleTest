@@ -75,7 +75,7 @@ for model in $(echo ${!dic[*]});do
     base_value=${dic[$model]}
     echo "${model} base value:${base_value}"
     echo "--${model} runned time:"
-    time ( python run.py \
+    time ( python -m paddle.distributed.launch run.py \
         --save_dir=./${model}_act_qat/ \
         --config_path=./configs/${model}/qat_dis.yaml > ${log_path}/${model}_act_qat 2>&1 )
     print_info $? ${model}_act_qat
