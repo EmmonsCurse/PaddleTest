@@ -37,7 +37,7 @@ for model in ${pre_models}
 do
     if [ ! -f ${model} ]; then
         echo ---infer ${model} downloading-----
-        wget -q ${root_url}/${model}_infer.tar
+        wget -q --no-proxy --no-check-certificate ${root_url}/${model}_infer.tar
         tar xf ${model}_infer.tar
     fi
 done
